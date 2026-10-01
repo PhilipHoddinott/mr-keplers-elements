@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>軌道6要素ビューア</title>
+  <meta name="description" content="軌道6要素（a, e, i, Ω, ω, ν）とJ2摂動による交点の後退を3Dで確認できる学習用ビューア / Interactive 3D viewer for the six Keplerian orbital elements and J2 nodal regression">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='5' fill='%233F6FB8'/%3E%3Cellipse cx='16' cy='16' rx='14' ry='7' fill='none' stroke='%23B9DB67' stroke-width='2' transform='rotate(-30 16 16)'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&family=STIX+Two+Text:ital,wght@1,500&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== 3D 表示 ===== -->
+  <main class="view">
+    <div class="stage" id="stage">
+      <canvas id="cv" data-i18n-aria="canvasAria"></canvas>
+      <div class="labels" id="labels"></div>
+      <div class="bar">
+        <div class="play">
+          <button class="pbtn" id="play" type="button"></button>
+          <div class="seg" id="speed" role="group" data-i18n-aria="speedAria">
+            <button type="button" data-v="lap" class="on" data-i18n="speedLap"></button>
+            <button type="button" data-v="0.1">×0.1</button><button type="button" data-v="1">×1</button><button type="button" data-v="10">×10</button><button type="button" data-v="100">×100</button>
+            <button type="button" data-v="1000">×1000</button>
+            <button type="button" data-v="86400" data-i18n="speedDay"></button>
+            <button type="button" data-v="864000" data-i18n="speedDay10"></button>
+          </div>
+        </div>
+        <div class="seg" id="views" role="group" data-i18n-aria="viewsAria">
+          <button type="button" data-v="oblique" class="on" data-i18n="viewOblique"></button>
+          <button type="button" data-v="north" data-i18n="viewNorth"></button>
+          <button type="button" data-v="node" data-i18n="viewNode"></button>
+          <button type="button" data-v="plane" data-i18n="viewPlane"></button>
+        </div>
+      </div>
+    </div>
+    <div class="explain" id="explain" aria-live="polite"></div>
+  </main>
+
+  <!-- ===== 操作パネル ===== -->
+  <aside class="panel">
+    <header>
+      <div class="title-row">
+        <h1 data-i18n="title"></h1>
+        <div class="seg lang" id="lang" role="group" data-i18n-aria="langLabel">
+          <button type="button" data-v="ja" lang="ja">日本語</button>
+          <button type="button" data-v="en" lang="en">EN</button>
+        </div>
+      </div>
+      <p data-i18n="lead"></p>
+    </header>
+
+    <section>
+      <h2 class="sec-t" data-i18n="presets"></h2>
+      <div class="chips" id="presets"></div>
+    </section>
+
+    <section class="simulation">
+      <h2 class="sec-t">Simulation clock · UTC</h2>
+      <output id="sim-clock" aria-live="off"></output>
+      <label class="time-label" for="sim-date">Set date and time (UTC)</label>
+      <input id="sim-date" type="datetime-local" step="1" min="2000-01-01T00:00" max="2100-12-31T23:59:59">
+      <button id="time-reset" class="ghost-btn" type="button">Reset to 21 March 2026</button>
+      <p id="sun-readout" class="muted"></p>
+      <p id="texture-status" class="muted" role="status" hidden></p>
+    </section>
+    <section class="seasons">
+      <h2 class="sec-t">Equinoxes &amp; solstices · 2026</h2>
+      <div id="season-events"></div>
+      <p class="muted">Select an event to jump to its time. All dates are UTC. March and September are equinoxes in both hemispheres; the seasons are reversed in the south.</p>
+      <a href="https://aa.usno.navy.mil/data/Earth_Seasons" target="_blank" rel="noopener">Event times: US Naval Observatory</a>
+    </section>
+    <section class="elements" id="elements"></section>
+
+    <section class="j2" id="j2">
+      <label class="switch">
+        <input type="checkbox" id="j2-on">
+        <span class="track" aria-hidden="true"></span>
+        <span class="switch-text"><b data-i18n="j2Title"></b><small data-i18n="j2Toggle"></small></span>
+      </label>
+      <p class="j2-hint" id="j2-hint" data-i18n="j2Hint"></p>
+      <div class="j2-body" id="j2-body" hidden>
+        <div class="ro">
+          <div><small data-i18n="j2RaanDot"></small><span id="j2-raan"></span></div>
+          <div><small data-i18n="j2ArgpDot"></small><span id="j2-argp"></span></div>
+          <div><small data-i18n="j2Cycle"></small><span id="j2-cycle"></span></div>
+          <div><small data-i18n="j2Elapsed"></small><span id="j2-elapsed"></span></div>
+          <div class="wide"><small data-i18n="j2DeltaO"></small><span id="j2-dO"></span></div>
+        </div>
+        <p class="j2-note" id="j2-note"></p>
+        <p class="j2-note muted" id="j2-frozen" data-i18n="j2Frozen" hidden></p>
+        <button type="button" class="ghost-btn" id="j2-reset" data-i18n="j2Reset"></button>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="sec-t" data-i18n="readouts"></h2>
+      <div class="ro">
+        <div><small data-i18n="rPerigee"></small><span id="r-hp"></span></div>
+        <div><small data-i18n="rApogee"></small><span id="r-ha"></span></div>
+        <div><small data-i18n="rPeriod"></small><span id="r-T"></span></div>
+        <div><small data-i18n="rAlt"></small><span id="r-alt"></span></div>
+        <div><small data-i18n="rSpeed"></small><span id="r-v"></span></div>
+        <div><small data-i18n="rGamma"></small><span id="r-g"></span></div>
+      </div>
+      <div class="sv" id="r-sv"></div>
+      <div id="r-alert"></div>
+    </section>
+
+    <section>
+      <h2 class="sec-t" data-i18n="glossary"></h2>
+      <dl class="gl" id="glossary"></dl>
+    </section>
+
+    <footer>
+      <span data-i18n="footer"></span><br>
+      <a href="https://github.com/Ki-math/orbital-elements-viewer" target="_blank" rel="noopener">Original viewer by Ki-math</a><br><a href="https://github.com/PhilipHoddinott/mr-keplers-elements">Source on GitHub</a>
+    </footer>
+  </aside>
+</div>
+
+<!-- 外部ライブラリ（three.js r128 + OrbitControls） -->
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<!-- アプリ本体：計算 → 内容 → 文言 → 表示 の順に読み込む -->
+<script src="js/orbitMechanics.js"></script>
+<script src="js/content.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/astronomy.js"></script>
+<script src="js/viewer.js"></script>
+</body>
+</html>
