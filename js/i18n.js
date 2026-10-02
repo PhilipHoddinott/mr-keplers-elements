@@ -147,31 +147,16 @@
     },
   };
 
-  const STORAGE_KEY = 'orbital-elements-viewer.lang';
   const listeners = [];
 
-  function initialLang() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'ja' || saved === 'en') return saved;
-    } catch (_) { /* ストレージが使えない環境では無視 */ }
-    return (navigator.language || 'ja').toLowerCase().startsWith('ja') ? 'ja' : 'en';
-  }
-
   const I18n = {
-    lang: initialLang(),
+    lang: 'en',
 
     t(key, ...args) {
-      const v = STRINGS[I18n.lang][key] ?? STRINGS.ja[key];
+      const v = STRINGS.en[key];
       return typeof v === 'function' ? v(...args) : v;
     },
 
-    setLang(lang) {
-      if (lang !== 'ja' && lang !== 'en') return;
-      I18n.lang = lang;
-      try { localStorage.setItem(STORAGE_KEY, lang); } catch (_) { /* 保存できなくても動作は続ける */ }
-      listeners.forEach(fn => fn(lang));
-    },
 
     onChange(fn) { listeners.push(fn); },
 

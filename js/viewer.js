@@ -163,7 +163,7 @@
       div.dataset.term = id;
       div.style.setProperty('--c', item.color);
       div.innerHTML = `
-        <dt><span class="dot"></span>${L.term}<span class="en">${L.alt}</span></dt>
+        <dt><span class="dot"></span>${L.term}</dt>
         <dd>${L.body}${item.figure === 'equinox' ? equinoxFigure() : ''}</dd>`;
       const focus = termFocus(id, item.tags);
       const isPinned = () => pinned && pinned.kind === 'term' && pinned.id === id;
@@ -856,7 +856,6 @@
         <span class="s" style="color:var(--c-${key})">${E.sym}</span><b>${L.name}</b><span class="k">${L.what}</span>
         ${pinnedKey() === key ? `<button class="x" type="button" id="unpin">${t('unpin')}</button>` : ''}
       </div>
-      <p class="ex-en">${L.alt}</p>
       <p>${L.desc}</p>
       <p class="now">${interpretValue(key)}</p>`;
     const unpin = $('#unpin');
@@ -1077,7 +1076,6 @@
      ======================================================= */
   function applyLanguage() {
     window.I18n.applyStatic();
-    document.querySelectorAll('#lang button').forEach(b => b.classList.toggle('on', b.dataset.v === window.I18n.lang));
     buildElementRows();
     buildPresets();
     buildGlossary();
@@ -1094,7 +1092,6 @@
      ======================================================= */
   bindSegmented('#views', kind => flyTo(viewDirection(kind), fitDistance()));
   bindSegmented('#speed', v => { speedMode = v; if (j2.on) updateJ2Readouts(); });
-  bindSegmented('#lang', lang => window.I18n.setLang(lang));
   window.I18n.onChange(applyLanguage);
   $('#play').addEventListener('click', () => setPlaying(!playing));
   $('#j2-on').addEventListener('change', ev => setJ2(ev.target.checked));

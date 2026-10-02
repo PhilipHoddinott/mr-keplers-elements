@@ -15,7 +15,7 @@ The Earth uses the supplied `blueMarble.jpg` (NASA Blue Marble imagery). Its exa
 - Press **Play / Pause** to advance or stop time. The initial epoch is **21 March 2026, 00:00:00 UTC**.
 - Choose **×0.1, ×1, ×10, ×100, ×1000, 1 day/s, or 10 days/s**. The original **1 orbit / 8 s** option adjusts speed to the current orbital period. Satellite motion, Earth spin, and Sun position share this speed.
 - Set a UTC date/time or select any of the four **2026 equinoxes and solstices** to jump there. Jumping pauses playback and propagates the current orbit to the selected time. Reset returns the clock to the initial epoch.
-- Drag to rotate the camera; scroll to zoom. Use orbit and camera presets or edit all six elements. Original Japanese/English controls and J2 precession remain available; new clock and season controls are in English.
+- Drag to rotate the camera; scroll to zoom. Use orbit and camera presets or edit all six elements. The interface is in English, and the original J2 precession controls remain available.
 - The **yellow arrow points from Earth toward the Sun**. Sunlight comes from that same direction, producing the day/night boundary. Earth spins eastward once per sidereal day (about **23 h 56 m 4 s**) with Greenwich aligned using mean sidereal time.
 
 ## Astronomy and assumptions
