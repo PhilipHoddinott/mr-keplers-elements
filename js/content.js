@@ -57,7 +57,8 @@
     {id: 'gps', ja: 'GPS',             en: 'GPS',            el: {a: 26560, e: 0.01,   i: 55,    O: 30,    w: 40,    n: 60}},
     {id: 'geo', ja: '静止軌道',        en: 'GEO',            el: {a: 42164, e: 0,      i: 0,     O: 0,     w: 0,     n: 45}},
     {id: 'gto', ja: 'GTO',             en: 'GTO',            el: {a: 24371, e: 0.7302, i: 28.5,  O: 30,    w: 180,   n: 20}},
-    {id: 'mol', ja: 'モルニヤ',        en: 'Molniya',        el: {a: 26600, e: 0.74,   i: 63.4,  O: 60,    w: 270,   n: 180}},
+    {id: 'mol', en: 'Molniya · 3 satellites', el: {a: Math.cbrt(398600.4418 * (86164.0905 / (4 * Math.PI)) ** 2), e: 0.74, i: 63.4349488, O: 60, w: 270, n: 180}},
+    {id: 'tundra', en: 'Tundra', el: {a: Math.cbrt(398600.4418 * (86164.0905 / (2 * Math.PI)) ** 2), e: 0.3, i: 63.4349488, O: 60, w: 270, n: 180}},
   ];
 
   /**

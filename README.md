@@ -42,3 +42,13 @@ This is a static site with no build step. Run `node server.cjs`, then open `http
 Run `node tests/physics.cjs` to check Kepler propagation, Earth rotation and seasonal solar geometry.
 
 Pushing to `main` runs `.github/workflows/pages.yml` and publishes the static files to GitHub Pages. The repository's Pages source must be **GitHub Actions**.
+
+## Molniya constellation and Tundra
+
+The Molniya preset shows three satellites on one shared ellipse, each with a colored line to Earth's center. They are spaced by 120 degrees of **mean anomaly**, giving equal time offsets of one-third of an orbital period (about four hours), rather than equal angular spacing. Kepler propagation makes them slow and cluster near northern apogee. Editing true anomaly retains the three-satellite demonstration; changing another element returns to a single custom orbit.
+
+Molniya uses eccentricity 0.74, critical inclination 63.4349488 degrees, argument of perigee 270 degrees (northern apogee), and a semi-major axis derived from half a sidereal day: **11.9672 hours**, with about **528 km perigee altitude**. Tundra uses the same inclination and northern apogee orientation, eccentricity 0.30, and one sidereal day: **23.9345 hours**.
+
+The live coverage panel computes latitude and geometric elevation at the North Pole for each Molniya satellite. Tests sample 1,440 phases across a full orbit: at least two satellites exceed 10 degrees elevation at the pole throughout the nominal demonstration, and each Molniya satellite spends about 69.5% of its orbit north of 45 degrees latitude. This is a simplified polar-visibility illustration, not a guarantee of continuous regional communications service; a particular ground site's coverage requires plane selection, Earth rotation, elevation constraints and handover planning. The single Tundra preset illustrates a geosynchronous elliptical orbit, not a full constellation.
+
+Background: [NASA's catalog of satellite orbits](https://science.nasa.gov/earth/earth-observatory/catalog-of-earth-satellite-orbits/) and [ESA's discussion of Tundra constellations](https://conference.sdo.esoc.esa.int/proceedings/sdc7/paper/328/SDC7-paper328.pdf).

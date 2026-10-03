@@ -61,7 +61,7 @@
     const E = ELEMENTS[key];
     state[key] = clamp(value, E.min, E.max);
     if (key === 'n') setPlaying(false);
-    activePreset = null;
+    if (key !== 'n') activePreset = null;
     pinned = elementFocus(key);
     resetJ2Timeline();
     refreshAll();
@@ -398,6 +398,10 @@
 
   // --- 軌道と補助線 ---
   const K = sceneKit, C = COLOR, N2 = ARC_SEG * 2 + 1;
+  const companions = [0xF2B84B, 0x5AA9F2].map(color => ({
+    ball: K.ball(color, 1, null, 1),
+    radius: K.line(2, color, 1, null, 1),
+  }));
   const obj = {
     // 基準
     pole:     K.line(2, C.muted, .6, null),
@@ -458,6 +462,10 @@
   addLabel('peri', 'lblPeri', 'var(--c-w)', ['a', 'e', 'w', 'n']);
   addLabel('apo',  'lblApo', 'var(--c-a)', ['a', 'e']);
   addLabel('sat',  'lblSat', 'var(--c-n)', ['n']);
+  companions.forEach((sat, k) => {
+    addLabel('companion' + k, null, k === 0 ? '#F2B84B' : '#5AA9F2', null);
+    labels['companion' + k].el.textContent = 'Satellite ' + (k + 2);
+  });
   addLabel('angO', null, 'var(--c-O)', ['O'], 'ang');
   addLabel('angI', null, 'var(--c-i)', ['i'], 'ang');
   addLabel('angW', null, 'var(--c-w)', ['w'], 'ang');
@@ -564,6 +572,31 @@
     setPoints(obj.semiMaj, [centerPos, periPos]);
     setPoints(obj.aeSeg, [centerPos, O0]);
     setPoints(obj.radius, [O0, satPos]);
+    const molniya = activePreset === 'mol';
+    const satellites = molniya ? OM.phasedConstellation(el) : [];
+    companions.forEach((sat, k) => {
+      sat.ball.visible = sat.radius.visible = molniya;
+      const label = labels['companion' + k];
+      label.hidden = !molniya;
+      label.el.hidden = !molniya;
+      if (molniya) {
+        const position = toScene(satellites[k + 1].rECI).multiplyScalar(1 / RE);
+        sat.ball.position.copy(position);
+        setBallSize(sat.ball, ms * 1.25);
+        setPoints(sat.radius, [O0, position]);
+        label.pos.copy(position).multiplyScalar(1.055);
+      }
+    });
+    labels.sat.el.textContent = molniya ? 'Satellite 1' : t('lblSat');
+    $('#coverage').hidden = !molniya && activePreset !== 'tundra';
+    if (molniya) {
+      const visible = satellites.filter(s => s.poleElevation >= 10).length;
+      $('#coverage-body').textContent = 'Three satellites share this ellipse, spaced 120° in mean anomaly (about 4 hours apart). They slow near northern apogee and take turns above high latitudes. Center lines show their geocentric directions, not radio beams.';
+      $('#coverage-readout').textContent = visible + ' of 3 above 10° elevation at the North Pole. ' + satellites.map((s,k) => 'S' + (k+1) + ': ' + s.latitude.toFixed(1) + '° latitude, ' + s.poleElevation.toFixed(1) + '° elevation').join(' · ');
+    } else if (activePreset === 'tundra') {
+      $('#coverage-body').textContent = 'Tundra: one sidereal day, eccentricity 0.30, critical inclination 63.435°, with northern apogee. This geosynchronous ellipse repeats its ground track daily and dwells over northern latitudes. A single satellite does not provide continuous coverage.';
+      $('#coverage-readout').textContent = 'Period: ' + (summary.period / 3600).toFixed(4) + ' hours.';
+    }
     const velDir = P.clone().multiplyScalar(-Math.sin(nu)).addScaledVector(Q, e + Math.cos(nu)).normalize();
     velArrow.position.copy(satPos);
     velArrow.setDirection(velDir);

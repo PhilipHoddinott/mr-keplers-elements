@@ -114,6 +114,18 @@
     };
   }
 
+  // Equal time spacing is equal MEAN anomaly, not equal true anomaly.
+  function phasedConstellation(el, count = 3) {
+    const mean = trueToMeanAnomaly(el.nu, el.e);
+    return Array.from({length: count}, (_, k) => {
+      const M = ((mean + k * 2 * Math.PI / count) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const s = orbitSummary({...el, nu: meanToTrueAnomaly(M, el.e)});
+      const latitude = Math.asin(s.rECI[2] / s.radius) * 180 / Math.PI;
+      const horizontal = Math.hypot(s.rECI[0], s.rECI[1]);
+      const poleElevation = Math.atan2(s.rECI[2] - RE, horizontal) * 180 / Math.PI;
+      return {...s, latitude, poleElevation};
+    });
+  }
   global.OrbitMechanics = {MU, RE, J2, SIDEREAL_YEAR_DAYS, perifocalBasis, trueToMeanAnomaly, meanToTrueAnomaly,
-                           orbitSummary, j2SecularRates};
+                           orbitSummary, j2SecularRates, phasedConstellation};
 })(window);
